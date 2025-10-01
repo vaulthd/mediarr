@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=America/New_York
+    volumes:
+      - ./jellyfin/config:/config
+      - /data/media:/media
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=America/New_York
+    volumes:
+      - ./jellyseerr:/app/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+
+  handbrake:
+    image: jlesage/handbrake
+    container_name: handbrake
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=America/New_York
+    volumes:
+      - /data/media:/media:rw
+      - ./handbrake/config:/config
+    ports:
+      - 5800:5800
+    restart: unless-stopped
+
+  rclone:
+    image: rclone/rclone:latest
+    container_name: rclone
+    command: serve http /data/media --addr :5572
+    ports:
+      - 5572:5572
+    volumes:
+      - /data/media:/data/media
+      - ./rclone/config:/config/rclone
+    restart: unless-stopped
+
